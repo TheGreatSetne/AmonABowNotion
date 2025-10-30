@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Notion Widgets - Gothic Timepiece</title>
+  <link rel="stylesheet" href="styles.css" />
+  <meta name="description" content="Create and export widgets for Notion." />
+</head>
+<body>
+  <button class="menu-button" id="menuButton">☰</button>
+  <nav class="nav-menu" id="navMenu">
+    <a href="index.html" class="nav-link">Home</a>
+    <a href="dashboard.html" class="nav-link">Dashboard</a>
+    <a href="notion.html" class="nav-link active">Notion</a>
+  </nav>
+
+  <header class="site-header">
+    <h1 class="title">Notion Widgets</h1>
+    <p class="subtitle">Code and export widgets for Notion</p>
+  </header>
+
+  <main class="container notion-container">
+    <div class="editor-layout">
+      <div class="editor-panel">
+        <div class="panel-header">
+          <h3 class="panel-title">HTML</h3>
+        </div>
+        <textarea id="htmlEditor" class="code-editor" placeholder="<!-- Enter your HTML here -->">&lt;div class=&quot;widget&quot;&gt;
+  &lt;h2 id=&quot;time&quot;&gt;00:00:00&lt;/h2&gt;
+  &lt;p id=&quot;date&quot;&gt;Loading...&lt;/p&gt;
+&lt;/div&gt;</textarea>
+      </div>
+
+      <div class="editor-panel">
+        <div class="panel-header">
+          <h3 class="panel-title">CSS</h3>
+        </div>
+        <textarea id="cssEditor" class="code-editor" placeholder="/* Enter your CSS here */">.widget {
+  font-family: 'Arial', sans-serif;
+  text-align: center;
+  padding: 20px;
+  background: #1a1a1a;
+  color: #f0f0f0;
+  border-radius: 8px;
+}
+
+.widget h2 {
+  font-size: 2.5rem;
+  margin: 10px 0;
+  color: #bfa760;
+}
+
+.widget p {
+  font-size: 1rem;
+  color: #a39c91;
+}</textarea>
+      </div>
+
+      <div class="editor-panel">
+        <div class="panel-header">
+          <h3 class="panel-title">JavaScript</h3>
+        </div>
+        <textarea id="jsEditor" class="code-editor" placeholder="// Enter your JavaScript here">function pad(n) {
+  return n.toString().padStart(2, '0');
+}
+
+function updateWidget() {
+  const now = new Date();
+  const time = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const date = now.toLocaleDateString(undefined, { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+  
+  document.getElementById('time').textContent = time;
+  document.getElementById('date').textContent = date;
+}
+
+updateWidget();
+setInterval(updateWidget, 1000);</textarea>
+      </div>
+    </div>
+
+    <div class="preview-section">
+      <div class="panel-header">
+        <h3 class="panel-title">Preview</h3>
+        <button id="refreshPreview" class="action-button">Refresh Preview</button>
+      </div>
+      <iframe id="previewFrame" class="preview-frame"></iframe>
+    </div>
+
+    <div class="export-section">
+      <button id="exportWidget" class="export-button">Export for Notion</button>
+      <div id="exportOutput" class="export-output hidden">
+        <h4 class="output-title">Notion Embed Code</h4>
+        <p class="output-instructions">Copy this HTML and use it in a Notion embed block:</p>
+        <textarea id="exportCode" class="export-code" readonly></textarea>
+        <button id="copyCode" class="copy-button">Copy to Clipboard</button>
+        <div id="copyFeedback" class="copy-feedback hidden">Copied!</div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <small>Hosted on <strong>Netlify</strong> · Designed in gothic style</small>
+  </footer>
+
+  <script>
+    const menuButton = document.getElementById('menuButton');
+    const navMenu = document.getElementById('navMenu');
+    menuButton.addEventListener('click', () => {
+      navMenu.classList.toggle('nav-menu-open');
+    });
+
+    const htmlEditor = document.getElementById('htmlEditor');
+    const cssEditor = document.getElementById('cssEditor');
+    const jsEditor = document.getElementById('jsEditor');
+    const previewFrame = document.getElementById('previewFrame');
+    const refreshPreview = document.getElementById('refreshPreview');
+    const exportWidget = document.getElementById('exportWidget');
+    const exportOutput = document.getElementById('exportOutput');
+    const exportCode = document.getElementById('exportCode');
+    const copyCode = document.getElementById('copyCode');
+    const copyFeedback = document.getElementById('copyFeedback');
+
+    function updatePreview() {
+      const html = htmlEditor.value;
+      const css = cssEditor.value;
+      const js = jsEditor.value;
+
+      const previewContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { margin: 0; padding: 20px; background: #fff; }
+    ${css}
+  </style>
+</head>
+<body>
+  ${html}
+  <script>
+    ${js}
+  <\/script>
+</body>
+</html>
+      `;
+
+      const blob = new Blob([previewContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      previewFrame.src = url;
+    }
+
+    refreshPreview.addEventListener('click', updatePreview);
+    updatePreview();
+
+    exportWidget.addEventListener('click', () => {
+      const html = htmlEditor.value;
+      const css = cssEditor.value;
+      const js = jsEditor.value;
+
+      const fullWidget = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { margin: 0; padding: 20px; background: transparent; }
+    ${css}
+  </style>
+</head>
+<body>
+  ${html}
+  <script>
+    ${js}
+  <\/script>
+</body>
+</html>`;
+
+      exportCode.value = fullWidget;
+      exportOutput.classList.remove('hidden');
+      exportCode.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    copyCode.addEventListener('click', () => {
+      exportCode.select();
+      document.execCommand('copy');
+      copyFeedback.classList.remove('hidden');
+      setTimeout(() => {
+        copyFeedback.classList.add('hidden');
+      }, 2000);
+    });
+
+    htmlEditor.addEventListener('input', () => {
+      updatePreview();
+    });
+    cssEditor.addEventListener('input', () => {
+      updatePreview();
+    });
+    jsEditor.addEventListener('input', () => {
+      updatePreview();
+    });
+  </script>
+</body>
+</html>
